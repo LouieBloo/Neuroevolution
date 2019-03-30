@@ -10,7 +10,7 @@ public class NeuralNetwork  {
 
     public float fitness;
 
-    
+    public int id = Random.Range(0, 99999);
 
     public NeuralNetwork(int inputLayerCount, int hiddenLayerCount, int outputLayerCount)
     {
@@ -47,7 +47,7 @@ public class NeuralNetwork  {
         return outputLayer.lastOutput;
     }
 
-    void debugInitialization()
+    public void debugInitialization()
     {
         Debug.Log("Hidden:");
         hiddenLayer.printLayer();

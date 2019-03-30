@@ -15,6 +15,8 @@ public class EdgeDetector : MonoBehaviour {
     //We only want to hit colliders on the wall layer
     int raycastableMask = 0;
 
+    float closestDistanceToGoal = 999999;
+
     // Use this for initialization
     void Start()
     {
@@ -73,12 +75,30 @@ public class EdgeDetector : MonoBehaviour {
     /// Returns between 0-1 for each axis, normalized in the goalDetectionRange. 0.5f is close, 1 and 0 or far on each side
     /// </summary>
     /// <returns></returns>
-    public List<float> getDistancesToGoal()
+    public List<float> getXYDistancesToGoal()
     {
         float xDistance = target.position.x - transform.position.x;
         float yDistance = target.position.y - transform.position.y;
 
+        float distanceToGoal = (target.position - transform.position).magnitude;
+        if(distanceToGoal < closestDistanceToGoal)
+        {
+            closestDistanceToGoal = distanceToGoal;
+            
+        }
+
+
         return new List<float>() { normalizeDistanceToGoal(xDistance), normalizeDistanceToGoal(yDistance) };
+    }
+
+    public float getClosestDitanceToGoal()
+    {
+        return closestDistanceToGoal;
+    }
+
+    public void resetClosestDistance()
+    {
+        closestDistanceToGoal = 99999;
     }
 
     float normalizeDistanceToGoal(float input)

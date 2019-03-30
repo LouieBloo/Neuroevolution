@@ -150,6 +150,7 @@ public class NetworkManager : MonoBehaviour
             }
 
             lastAverageFitenss += n.fitness;//average
+           // Debug.Log(n.id + " : " + n.fitness);
         }
 
         lastAverageFitenss /= testedNetworks.Count;
@@ -167,6 +168,10 @@ public class NetworkManager : MonoBehaviour
         {
             topNetworks.Add(testedNetworks[x]);
         }
+
+        //Debug.Log(topNetworks[0].fitness + " : " + debug);
+        //Debug.Log("BEST: " + topNetworks[0].id + " : " + topNetworks[0].fitness);
+        //topNetworks[0].debugInitialization();
 
 
         List<NeuralNetwork> newChildren = new List<NeuralNetwork>();
@@ -330,7 +335,6 @@ public class NetworkManager : MonoBehaviour
     public void modifyTimeScale(float input)
     {
         Time.timeScale = input;
-        timeScale = input / 100f;
         Debug.Log(timeScale);
     }
 }
