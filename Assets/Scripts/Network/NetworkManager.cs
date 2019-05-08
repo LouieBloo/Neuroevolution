@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System.IO;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -38,17 +39,29 @@ public class NetworkManager : MonoBehaviour
     public Text currentChromosomeText;
     public Text generationCountText;
     public Text lastAverageFitnessText;
+    public Text timeScaleText;
 
     System.DateTime howLong;
 
+    //write average to file
+    StreamWriter writer;
+
     void Start()
     {
+       
+    }
+
+    void OnDestroy()
+    {
+        writer.Close();
     }
 
     public void startPressed()
     {
         untestedNetworks.Clear();
         testedNetworks.Clear();
+
+        writer = new StreamWriter("averages.txt", true);
 
         for (int x = 0; x < initialPopulation; x++)
         {
@@ -106,7 +119,7 @@ public class NetworkManager : MonoBehaviour
         //float fitness = timeBasedFitnessCalculation(timeItTookToDie);
         //Debug.Log("Agent died with fitness: " + fitness);
 
-        networkTested.fitness = fitness;
+        networkTested.setFitness(fitness);
 
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);
@@ -132,7 +145,7 @@ public class NetworkManager : MonoBehaviour
     {
         howLong = System.DateTime.Now;
         //sort by fitness, best first
-        testedNetworks = testedNetworks.OrderByDescending(x => x.fitness).ToList();
+        testedNetworks = testedNetworks.OrderByDescending(x => x.getFitness()).ToList();
 
         //calculate average,best,worst fitness of this generation
         lastAverageFitenss = 0;
@@ -140,16 +153,17 @@ public class NetworkManager : MonoBehaviour
         lastWorstFitness = 999999;
         foreach(NeuralNetwork n in testedNetworks)
         {
-            if(n.fitness > lastBestFitenss)//best fitness
+            float networkFitness = n.getFitness();
+            if(networkFitness > lastBestFitenss)//best fitness
             {
-                lastBestFitenss = n.fitness;
+                lastBestFitenss = networkFitness;
             }
-            else if(n.fitness < lastWorstFitness)//worst
+            else if(networkFitness < lastWorstFitness)//worst
             {
-                lastWorstFitness = n.fitness;
+                lastWorstFitness = networkFitness;
             }
 
-            lastAverageFitenss += n.fitness;//average
+            lastAverageFitenss += networkFitness;//average
            // Debug.Log(n.id + " : " + n.fitness);
         }
 
@@ -167,6 +181,8 @@ public class NetworkManager : MonoBehaviour
         for (int x = 0; x < totalEliteChromosomeCount; x++)
         {
             topNetworks.Add(testedNetworks[x]);
+            //also wipe the networks fitness memory
+            testedNetworks[x].resetFitness();
         }
 
         //Debug.Log(topNetworks[0].fitness + " : " + debug);
@@ -200,6 +216,8 @@ public class NetworkManager : MonoBehaviour
         untestedNetworks = newChildren;
 
         //Debug.Log("Untested: " + untestedNetworks.Count);
+        //writer.Write(lastAverageFitenss + ",");
+        //writer.Flush();
 
         startTestingGeneration();
     }
@@ -218,6 +236,17 @@ public class NetworkManager : MonoBehaviour
         totalTimeRunningGeneration = 0;
 
         updateTexts();
+    }
+
+    /// <summary>
+    /// Used for when we have mutliple rounds of judging before a breed, mutate, etc
+    /// </summary>
+    /// <param name="networks"></param>
+    protected virtual void resetSoft(List<NeuralNetwork> networks)
+    {
+        untestedNetworks = networks;
+
+        testedNetworks = new List<NeuralNetwork>();
     }
 
     /// <summary>
@@ -315,6 +344,8 @@ public class NetworkManager : MonoBehaviour
         generationCountText.text = "Generation: " + generationCount;
         currentChromosomeText.text = "Chromosome: " + currentChromosome;
         lastAverageFitnessText.text = "Worst: " + lastWorstFitness + "     Average: " + lastAverageFitenss + "     Best: " + lastBestFitenss;
+
+   
     }
 
 
@@ -335,6 +366,6 @@ public class NetworkManager : MonoBehaviour
     public void modifyTimeScale(float input)
     {
         Time.timeScale = input;
-        Debug.Log(timeScale);
+        this.timeScaleText.text = input + "x real speed";
     }
 }

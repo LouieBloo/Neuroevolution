@@ -12,6 +12,8 @@ public class EdgeDetector : MonoBehaviour {
     public Transform parent;
     public Transform target;
 
+    public bool drawEdges = true;
+
     //We only want to hit colliders on the wall layer
     int raycastableMask = 0;
 
@@ -50,7 +52,11 @@ public class EdgeDetector : MonoBehaviour {
                 float distance = hit && hit.collider.CompareTag("Target") ? 1 : normalizePoint(hit);
                 returnList.Add(distance);
                 //ui stuff
-                edges[index].setSize( (0.5f+(distance/2f)) * detectionRange, detectionRange);//need to first turn our -1 - 1 to 0 - 1
+                if (drawEdges)
+                {
+                    edges[index].setSize((0.5f + (distance / 2f)) * detectionRange, detectionRange);//need to first turn our -1 - 1 to 0 - 1
+                }
+                
                 index++;
             }
         }

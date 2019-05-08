@@ -109,7 +109,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1486427838483528
 GameObject:
   m_ObjectHideFlags: 0
@@ -278,7 +278,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1701911515893124}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -53.420235, y: -21.039974, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4913299186973464}
@@ -480,7 +480,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c28628ee6d16fc43a9de10b50402dc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRange: 20
+  detectionRange: 50
   distanceToGoalDetectionRange: 100
   edges:
   - {fileID: 114701267067080942}
@@ -493,6 +493,7 @@ MonoBehaviour:
   - {fileID: 114663035803641262}
   parent: {fileID: 0}
   target: {fileID: 0}
+  drawEdges: 0
 --- !u!114 &114260776203264650
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -518,10 +519,10 @@ MonoBehaviour:
   rigidBody: {fileID: 50145546665867716}
   leftThruster: {fileID: 4293961838483826}
   rightThruster: {fileID: 4644902479799212}
-  sideThrusterPower: 500
-  middleThrustPower: 500
-  maxGas: 200
-  gas: 1000
+  sideThrusterPower: 35
+  middleThrustPower: 35
+  maxGas: 300
+  gas: 300
 --- !u!114 &114480473609198006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -537,11 +538,13 @@ MonoBehaviour:
   middleThrust: 0
   leftThrust: 0
   rightThrust: 0
+  gravityScale: 0.163
+  minimumMovementTimeUntilDead: 10
+  minimumMovementDistanceUntilDead: 8
   engine: {fileID: 114371588212648942}
   seeker: {fileID: 114585708197139704}
   edgeDetector: {fileID: 114117931231382898}
   alive: 0
-  target: {fileID: 0}
 --- !u!114 &114552528213081754
 MonoBehaviour:
   m_ObjectHideFlags: 1

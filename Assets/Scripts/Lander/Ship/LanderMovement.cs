@@ -28,6 +28,7 @@ public class LanderMovement : MonoBehaviour {
     public void thrust(float thrustAmount)
     {
         float power = fuelLines(middleThrustPower, thrustAmount);
+        power = power > 0 ? power : 0;
         rigidBody.AddForce(new Vector2(transform.up.x * power, transform.up.y * power), ForceMode2D.Impulse);
     }
 
@@ -35,6 +36,7 @@ public class LanderMovement : MonoBehaviour {
     {
         //rigidBody.AddForceAtPosition(new Vector2(0, fuelLines(sideThrusterPower, thrustAmount)), new Vector2(-10, 10));
         float power = fuelLines(sideThrusterPower, thrustAmount);
+        power = power > 0 ? power : 0;
         rigidBody.AddForceAtPosition(new Vector2(leftThruster.up.x * power, leftThruster.up.y * power),leftThruster.position);
     }
 
@@ -42,6 +44,7 @@ public class LanderMovement : MonoBehaviour {
     {
         //rigidBody.AddForceAtPosition(new Vector2(0, ), new Vector2(10, 10));
         float power = fuelLines(sideThrusterPower, thrustAmount);
+        power = power > 0 ? power : 0;
         rigidBody.AddForceAtPosition(new Vector2(rightThruster.up.x * power, rightThruster.up.y * power),rightThruster.position);
     }
 

@@ -78,7 +78,7 @@ public class Main : MonoBehaviour {
         //float fitness = timeBasedFitnessCalculation(timeItTookToDie);
         //Debug.Log("Agent died with fitness: " + fitness);
 
-        networkTested.fitness = fitness;
+        networkTested.setFitness(fitness);
 
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);
@@ -103,7 +103,7 @@ public class Main : MonoBehaviour {
     void parseTestingResults()
     {
         //sort by fitness, best first
-        testedNetworks = testedNetworks.OrderByDescending(x => x.fitness).ToList();
+        testedNetworks = testedNetworks.OrderByDescending(x => x.getFitness()).ToList();
 
         //get how many networks are 10% of the total population
         int top10PercentCount = Mathf.RoundToInt ((float)testedNetworks.Count * crossoverRate);

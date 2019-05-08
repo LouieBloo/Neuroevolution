@@ -12,7 +12,7 @@ public class Dendrite {
 
     public Dendrite()
     {
-        weight = UnityEngine.Random.Range(-0.1f, 0.1f);
+        weight = UnityEngine.Random.Range(-0.5f, 0.5f);
     }
 
     public Dendrite(float weight,float lastOutput)
@@ -41,11 +41,11 @@ public class Dendrite {
             diceRoll = UnityEngine.Random.Range(0f, 1f);//roll another dice to decide if we are mutating up, or down, aka are we adding or subtracting to our weight
             if(diceRoll <= 0.5f)
             {
-                weight += weight * mutationAmount;
+                weight += UnityEngine.Random.Range(0,mutationAmount);
             }
             else
             {
-                weight -= weight * mutationAmount;
+                weight -= UnityEngine.Random.Range(0, mutationAmount);
             }
         }
 

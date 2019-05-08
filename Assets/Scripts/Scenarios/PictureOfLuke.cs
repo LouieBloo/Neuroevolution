@@ -53,7 +53,7 @@ public class PictureOfLuke : NetworkManager
     void networkFinishedTesting(NeuralNetwork networkTested, int foodCount, float timeSurvived)
     {
         //Debug.Log("Dead: " + foodCount);
-        networkTested.fitness = fitnessFunc(foodCount, timeSurvived);
+        //networkTested.fitness = fitnessFunc(foodCount, timeSurvived);
 
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);

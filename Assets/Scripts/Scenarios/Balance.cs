@@ -42,7 +42,7 @@ public class Balance : NetworkManager
     void testCompleted(NeuralNetwork networkTested,float timer)
     {
         float fitness = timer;
-        networkTested.fitness = fitness;
+        networkTested.setFitness(fitness);
         //Debug.Log(untestedNetworks.Count + " :TestComplete");
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);

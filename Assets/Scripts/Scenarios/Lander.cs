@@ -9,17 +9,29 @@ public class Lander : NetworkManager {
     public Transform target;
 
     public List<Transform> spawnPoints;
+    //keeps track of how many spawnPoints we have tested;
+    int spawnPointTracker = 0;
 
     LanderShip[] allShips;
 
+    float timer = 0;
+    float timeAliveDecreaser = 1000;
+
     void Start()
     {
+        Application.runInBackground = true;
+
         allShips = new LanderShip[100];
         for(int x = 0; x < 100; x++)
         {
             GameObject newLander = Instantiate(landerShipPrefab);
             allShips[x] = newLander.GetComponent<LanderShip>();
         }
+    }
+
+    void Update()
+    {
+        this.timer += Time.deltaTime;
     }
 
     protected override void testNetwork(NeuralNetwork networkToTest)
@@ -32,18 +44,27 @@ public class Lander : NetworkManager {
 
     protected override void testNetworksParallel(List<NeuralNetwork> networks)
     {
-        int spawn = Random.Range(0, spawnPoints.Count);
-        for (int x = 0; x < 100;x++)
-        {
-            allShips[x].startGame(target, networks[x], networkFinishedTesting,spawnPoints[spawn]);
-        }
+        this.spawnPointTracker = 0;
+
+        deployShips(networks, spawnPoints[spawnPointTracker]);
     }
 
-    void networkFinishedTesting(NeuralNetwork networkTested, float aStarDistance,bool isInLOS,float closestDistanceToGoal)
+    void deployShips(List<NeuralNetwork> networks,Transform spawnPosition)
+    {
+        this.timer = 0;
+        this.timeAliveDecreaser--;
+        for (int x = 0; x < 100; x++)
+        {
+            allShips[x].startGame(target, networks[x], networkFinishedTesting, spawnPosition);
+        }
+        
+    }
+
+    void networkFinishedTesting(NeuralNetwork networkTested, float aStarDistance,bool isInLOS,float speed)
     {
         //Debug.Log("Dead: " + foodCount);
 
-        networkTested.fitness = fitnessFunc(aStarDistance, isInLOS,closestDistanceToGoal);
+        networkTested.setFitness(fitnessFunc(aStarDistance, isInLOS,speed));
 
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);
@@ -58,20 +79,36 @@ public class Lander : NetworkManager {
         }
         else
         {
-            StartCoroutine(waitAFrame());
+            StartCoroutine(goNextOrStop(testedNetworks));
         }
     }
 
     //let our landers have a frame to reset
-    IEnumerator waitAFrame()
+    IEnumerator goNextOrStop(List<NeuralNetwork> networks)
     {
         yield return null;
-        parseTestingResults();
+
+        spawnPointTracker++;
+        //check if its time for the network manager to kill, breed, and mutate our network
+        if(spawnPointTracker >= spawnPoints.Count)
+        {
+            parseTestingResults();
+        }
+        else
+        {
+            this.deployShips(networks, spawnPoints[spawnPointTracker]);
+            this.resetSoft(networks);
+        }
     }
 
-    float fitnessFunc(float aStarDistance, bool isInLOS,float closestDistanceToGoal)
+    float fitnessFunc(float aStarDistance, bool isInLOS,float speed)
     {
-        return 100f - aStarDistance;
+        float timeAmount = timeAliveDecreaser > 0 ? this.timer / (1f + (1 / timeAliveDecreaser)) : 0;
+        if(aStarDistance <= 0)
+        {
+            return 350f + (75f - speed) + timeAmount;
+        }
+        return 350f - aStarDistance - speed + timeAmount;
         //float distanceFromGoal = (target.position - finalPosition).magnitude;
         //if (isInLOS)
         //{

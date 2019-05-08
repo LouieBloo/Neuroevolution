@@ -8,7 +8,8 @@ public class NeuralNetwork  {
     Layer hiddenLayer;
     Layer outputLayer;
 
-    public float fitness;
+    float fitness;
+    List<float> fitnessHistory = new List<float>();
 
     public int id = Random.Range(0, 99999);
 
@@ -29,7 +30,27 @@ public class NeuralNetwork  {
         outputLayer = new Layer(outputLayerCount,hiddenLayerCount);
     }
 
-    
+    public void setFitness(float input)
+    {
+        fitnessHistory.Add(input);
+        this.fitness = input;
+    }
+
+    public float getFitness()
+    {
+        float final = 0;
+        foreach(float f in fitnessHistory)
+        {
+            final += f;
+        }
+        return final;
+    }
+
+    public void resetFitness()
+    {
+        this.fitnessHistory.Clear();
+        this.fitness = 0;
+    }
 
     public List<float> feedInputs(List<float> inputs)
     {

@@ -11,7 +11,11 @@ public class LanderShip : MonoBehaviour {
     public float middleThrust = 0f;
     public float leftThrust = 0f;
     public float rightThrust = 0f;
-
+    public float gravityScale = 0.163f;
+    public float minimumMovementTimeUntilDead = 2f;
+    public float minimumMovementDistanceUntilDead = 0.85f;
+    float lastSpeed = 0;
+    float movementTimer = 0;
 
     public LanderMovement engine;
     public Seeker seeker;
@@ -20,6 +24,7 @@ public class LanderShip : MonoBehaviour {
     public bool alive = false;
 
     Transform target;
+    Vector3 startLocation;
 
     NeuralNetwork brain;
     Action<NeuralNetwork,float,bool,float> deathCallback;
@@ -52,11 +57,19 @@ public class LanderShip : MonoBehaviour {
     public void startGame(Transform target, NeuralNetwork networkToTest,Action<NeuralNetwork,float,bool,float> callback,Transform startLocation)
     {
         this.gameObject.SetActive(true);
+        this.startLocation = startLocation.position;
         this.transform.position = startLocation.position;
         this.deathCallback = callback;
         this.target = target;
         this.edgeDetector.target = target;
         this.brain = networkToTest;
+
+        this.lastSpeed = 0;
+        this.movementTimer = 0;
+
+        this.rigidBody.gravityScale = gravityScale;
+        this.alive = true;
+
 
         //start game loop
         mainLoop = aliveLoop();
@@ -65,14 +78,24 @@ public class LanderShip : MonoBehaviour {
 
     IEnumerator aliveLoop()
     {
-        this.rigidBody.gravityScale = 1;
-        alive = true;
-
         List<float> inputs;
         List<float> outputs;
         while (alive)
         {
+            movementTimer += Time.deltaTime;
 
+            if(movementTimer >= minimumMovementTimeUntilDead)
+            {
+                //check if we haven't moved a minimum distance yet
+                if(distanceFromStart() <= minimumMovementDistanceUntilDead)
+                {
+                    dieFromWall();
+                }
+                else
+                {
+                    movementTimer = -99999f;//jank but works so we dont have to check this everytime
+                }
+            }
             inputs = generateNetworkInputs();
             outputs = brain.feedInputs(inputs);
 
@@ -93,7 +116,7 @@ public class LanderShip : MonoBehaviour {
         //add currentRotation
         returnInputs.Add(transform.rotation.z);
         //los returns 1
-        returnInputs.Add(edgeDetector.getLOS());
+        //returnInputs.Add(edgeDetector.getLOS());
         //distance returns 2
         returnInputs.AddRange(edgeDetector.getXYDistancesToGoal());
 
@@ -117,16 +140,21 @@ public class LanderShip : MonoBehaviour {
         {
             float aStarDistance = p.GetTotalLength();
 
-            this.transform.position = new Vector2(UnityEngine.Random.Range(-0.05f, 0.05f), UnityEngine.Random.Range(-0.05f, 0.05f));
-            this.transform.localRotation = Quaternion.identity;
+            resetShip();
 
-            this.engine.refill();
-            edgeDetector.resetClosestDistance();
-
-            deathCallback(brain, aStarDistance, edgeDetector.getLOS() == 1f, edgeDetector.getClosestDitanceToGoal());
+            deathCallback(brain, aStarDistance, edgeDetector.getLOS() == 1f, lastSpeed);
 
             this.gameObject.SetActive(false);
         }
+    }
+
+    void resetShip()
+    {
+        this.transform.position = new Vector2(UnityEngine.Random.Range(-0.05f, 0.05f), UnityEngine.Random.Range(-0.05f, 0.05f));
+        this.transform.localRotation = Quaternion.identity;
+
+        this.engine.refill();
+        edgeDetector.resetClosestDistance();
     }
 
     void stopShip()
@@ -139,18 +167,47 @@ public class LanderShip : MonoBehaviour {
         this.alive = false;
     }
 
+    float getSpeed()
+    {
+        return this.rigidBody.velocity.magnitude;
+    }
+
     void OnTriggerEnter2D(Collider2D col)
     {
         if(col && col.gameObject.CompareTag("Wall"))
         {
             if (alive)
             {
-                stopShip();
-                seeker.StartPath(transform.position, target.position, pathCalculated);
+                dieFromWall();
+            }
+        }else if(col && col.gameObject.CompareTag("Target"))
+        {
+            if (alive)
+            {
+                dieFromTarget();
             }
         }
     }
 
+    void dieFromWall()
+    {
+        lastSpeed = getSpeed();
+        stopShip();
+        seeker.StartPath(transform.position, target.position, pathCalculated);
+    }
+
+    void dieFromTarget()
+    {
+        lastSpeed = getSpeed();
+        deathCallback(brain, 0, edgeDetector.getLOS() == 1f, lastSpeed);
+        stopShip();
+        resetShip();
+    }
+
+    float distanceFromStart()
+    {
+        return (transform.position - startLocation).magnitude;
+    }
 
 
 }
