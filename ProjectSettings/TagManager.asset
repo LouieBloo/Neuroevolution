@@ -11,6 +11,8 @@ TagManager:
   - SnakeWall
   - SnakeFood
   - Target
+  - DeathCircle
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -24,8 +26,8 @@ TagManager:
   - Wall
   - Target
   - Raycastable
-  - 
-  - 
+  - Team0
+  - Team1
   - 
   - 
   - 

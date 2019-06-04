@@ -519,10 +519,10 @@ MonoBehaviour:
   rigidBody: {fileID: 50145546665867716}
   leftThruster: {fileID: 4293961838483826}
   rightThruster: {fileID: 4644902479799212}
-  sideThrusterPower: 35
+  sideThrusterPower: 50
   middleThrustPower: 35
-  maxGas: 300
-  gas: 300
+  maxGas: 15000
+  gas: 15000
 --- !u!114 &114480473609198006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -539,8 +539,8 @@ MonoBehaviour:
   leftThrust: 0
   rightThrust: 0
   gravityScale: 0.163
-  minimumMovementTimeUntilDead: 10
-  minimumMovementDistanceUntilDead: 8
+  minimumMovementTimeUntilDead: 20
+  minimumMovementDistanceUntilDead: 10
   engine: {fileID: 114371588212648942}
   seeker: {fileID: 114585708197139704}
   edgeDetector: {fileID: 114117931231382898}

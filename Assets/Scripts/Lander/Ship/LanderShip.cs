@@ -82,20 +82,20 @@ public class LanderShip : MonoBehaviour {
         List<float> outputs;
         while (alive)
         {
-            movementTimer += Time.deltaTime;
+            //movementTimer += Time.deltaTime;
 
-            if(movementTimer >= minimumMovementTimeUntilDead)
-            {
-                //check if we haven't moved a minimum distance yet
-                if(distanceFromStart() <= minimumMovementDistanceUntilDead)
-                {
-                    dieFromWall();
-                }
-                else
-                {
-                    movementTimer = -99999f;//jank but works so we dont have to check this everytime
-                }
-            }
+            //if(movementTimer >= minimumMovementTimeUntilDead)
+            //{
+            //    //check if we haven't moved a minimum distance yet
+            //    if(distanceFromStart() <= minimumMovementDistanceUntilDead)
+            //    {
+            //        dieFromWall();
+            //    }
+            //    else
+            //    {
+            //        movementTimer = -99999f;//jank but works so we dont have to check this everytime
+            //    }
+            //}
             inputs = generateNetworkInputs();
             outputs = brain.feedInputs(inputs);
 
@@ -174,17 +174,19 @@ public class LanderShip : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        if(col && col.gameObject.CompareTag("Wall"))
+        if(col && alive)
         {
-            if (alive)
+            if (col.gameObject.CompareTag("Wall"))
             {
                 dieFromWall();
             }
-        }else if(col && col.gameObject.CompareTag("Target"))
-        {
-            if (alive)
+            else if (col.gameObject.CompareTag("Target"))
             {
                 dieFromTarget();
+            }
+            else if (col.gameObject.CompareTag("DeathCircle"))
+            {
+                dieFromWall();
             }
         }
     }

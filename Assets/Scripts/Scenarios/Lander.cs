@@ -9,6 +9,9 @@ public class Lander : NetworkManager {
     public Transform target;
 
     public List<Transform> spawnPoints;
+
+    public float timeUntilDeathCircle;
+
     //keeps track of how many spawnPoints we have tested;
     int spawnPointTracker = 0;
 
@@ -16,6 +19,9 @@ public class Lander : NetworkManager {
 
     float timer = 0;
     float timeAliveDecreaser = 1000;
+
+    public DeathCircle deathCircle;
+    bool runningSimulation = false;
 
     void Start()
     {
@@ -31,7 +37,15 @@ public class Lander : NetworkManager {
 
     void Update()
     {
-        this.timer += Time.deltaTime;
+        if (runningSimulation)
+        {
+            this.timer += Time.deltaTime;
+            if(this.timer >= timeUntilDeathCircle && !deathCircle.running)
+            {
+                deathCircle.startGrowing(spawnPoints[spawnPointTracker].position);
+            }
+        }
+        
     }
 
     protected override void testNetwork(NeuralNetwork networkToTest)
@@ -53,6 +67,8 @@ public class Lander : NetworkManager {
     {
         this.timer = 0;
         this.timeAliveDecreaser--;
+        this.runningSimulation = true;
+
         for (int x = 0; x < 100; x++)
         {
             allShips[x].startGame(target, networks[x], networkFinishedTesting, spawnPosition);
@@ -79,6 +95,8 @@ public class Lander : NetworkManager {
         }
         else
         {
+            this.runningSimulation = false;
+            this.deathCircle.stopGrowing();
             StartCoroutine(goNextOrStop(testedNetworks));
         }
     }
