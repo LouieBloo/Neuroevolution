@@ -7,8 +7,10 @@ public class Snake : NetworkManager
     public GameObject snakeGamePrefab;
     GameObject activeSnakeGame;
 
-	void Start () {
-		
+    public static float frameDelay = 0.01f;
+
+    void Start () {
+        Application.runInBackground = true;
 	}
 
     protected override void testNetwork(NeuralNetwork networkToTest)
@@ -44,5 +46,10 @@ public class Snake : NetworkManager
         //return Mathf.Exp(foodEaten) + (timeSurvived / 10f);
         //return timeSurvived;
         return foodEaten;
+    }
+
+    public void changeFrameTime(float input)
+    {
+        frameDelay = input;
     }
 }

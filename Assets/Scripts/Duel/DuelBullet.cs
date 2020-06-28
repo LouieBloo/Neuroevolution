@@ -11,11 +11,12 @@ public class DuelBullet : MonoBehaviour {
 
     Dueler ownerDueler;
 	
-    public void setup(Vector2 direction,int teamNumber,Dueler owner)
+    public void setup(Vector2 direction,int teamNumber,Dueler owner,Quaternion rotation)
     {
         this.direction = direction;
         this.teamNumber = teamNumber;
         this.ownerDueler = owner;
+        this.transform.rotation = rotation;
 
         this.gameObject.layer =  LayerMask.NameToLayer("Team" + teamNumber);
     }

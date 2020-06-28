@@ -702,26 +702,26 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 715527774}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a7670e4263cde74eaa8f629cfb10e2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   initialPopulation: 100
-  layerCounts: 260000001e00000004000000
+  layerCounts: 260000001e00000003000000
   crossoverRate: 0.1
-  mutationRate: 0.4
-  mutationAmount: 0.2
+  mutationRate: 0.25
+  mutationAmount: 0.1
   spawnBehavior: 1
   currentChromosomeText: {fileID: 1864959145}
   generationCountText: {fileID: 1099392563}
   lastAverageFitnessText: {fileID: 1289091807}
   timeScaleText: {fileID: 1640477236}
-  logAverages: 1
+  logAverages: 0
   duelerPrefab: {fileID: 1001551016872230, guid: c2beb76c7a2cdd04fb78f84b08e3a459,
     type: 2}
   spawnPoints: []
-  timeUntilDeathCircle: 10
+  timeUntilDeathCircle: 5
   deathCircle: {fileID: 954360314}
 --- !u!1001 &763569281
 Prefab:
@@ -948,7 +948,7 @@ GameObject:
   - component: {fileID: 954360314}
   m_Layer: 11
   m_Name: DeathCircle
-  m_TagString: Wall
+  m_TagString: DeathCircle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -964,7 +964,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15e7b5592e78fb74aa2f38e427ef0983, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  growthRate: 4
+  growthRate: 15
   running: 0
 --- !u!58 &954360315
 CircleCollider2D:

@@ -37,6 +37,8 @@ public class DuelGame : NetworkManager
             GameObject dueler = Instantiate(duelerPrefab);
             duelers[x] = dueler.GetComponent<Dueler>();
         }
+
+        
     }
 
     void Update()
@@ -109,8 +111,8 @@ public class DuelGame : NetworkManager
         if(duelerCounter == amountOfDuelers - 1 )
         {
             networkTested.setFitness(fitnessFunc(timer, won, wasShot, killCount));
-            if (wasShot)
-            {
+            //if (wasShot)
+            //{
                 foreach (Dueler d in duelers)
                 {
                     if (d.alive)
@@ -118,7 +120,7 @@ public class DuelGame : NetworkManager
                         d.win();
                     }
                 }
-            }
+           // }
         }
         else if (duelerCounter == amountOfDuelers)
         {
@@ -165,12 +167,12 @@ public class DuelGame : NetworkManager
        
         if (won && killCount < 1)
         {
-            return 10000f + aliveTime; 
+            return 0; 
         }else if (won)
         {
-            return 10000f + (killCountBounty-aliveTime);
+            return killCountBounty-aliveTime;
         }
 
-        return aliveTime + killCountBounty;
+        return 0;
     }
 }

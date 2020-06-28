@@ -78,6 +78,7 @@ public class Dueler : MonoBehaviour {
         {
             //add our x amount of edges
             inputs = edgeDetector.getEdges();
+
             //add our x distance and y distance normalized
             inputs.Add((this.target.position.x - transform.position.x) / DuelGame.mapSize);
             inputs.Add((this.target.position.y - transform.position.y) / DuelGame.mapSize);
@@ -98,10 +99,10 @@ public class Dueler : MonoBehaviour {
             //}
             //Debug.Log(log);
 
-            moveHorizontal(outputs[0]);
-            moveVertical(outputs[1]);
-            turret.rotate(outputs[2]);
-            turret.fire(teamNumber, outputs[3],this);
+            //moveHorizontal(outputs[0]);
+            moveVertical(outputs[0]);
+            turret.rotate(outputs[1]);
+            turret.fire(teamNumber, outputs[2],this);
 
 
             yield return null;
@@ -132,7 +133,7 @@ public class Dueler : MonoBehaviour {
             }
             else if (col.gameObject.CompareTag("DeathCircle"))
             {
-                hitByWall();
+                hitByDeathCircle();
             }
             else if (col.gameObject.CompareTag("Bullet"))
             {
@@ -170,7 +171,10 @@ public class Dueler : MonoBehaviour {
 
     void hitByWall()
     {
-        this.transform.position = new Vector3(0, 0, this.transform.position.z);
+        if (alive)
+        {
+            die(false, false);
+        }
     }
 
     void hitByDeathCircle()

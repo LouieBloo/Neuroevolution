@@ -21,12 +21,11 @@ public class DuelerTurret : MonoBehaviour {
         //turret.rotation = Quaternion.Euler(0, 0, angle + 270f);
 
         attackTimer += Time.deltaTime;
-        
     }
 
     public void rotate(float input)
     {
-        turret.rotation = Quaternion.Euler(0, 0, (1f + input)*(360f / 2f));
+        turret.rotation = Quaternion.Euler(0, 0, (1f + input)*(180f));
     }
 
     public void fire(int teamNumber,float amount,Dueler owner)
@@ -34,7 +33,7 @@ public class DuelerTurret : MonoBehaviour {
         if(amount >= fireThreshold && attackTimer >= attackSpeed)
         {
             GameObject bullet = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
-            bullet.GetComponent<DuelBullet>().setup(turret.up, teamNumber, owner);
+            bullet.GetComponent<DuelBullet>().setup(turret.up, teamNumber, owner,turret.rotation);
 
             attackTimer = 0;
         }
