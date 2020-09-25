@@ -31,6 +31,8 @@ public class SnakeGame : MonoBehaviour {
 
     Vector2 currentPositionOfSnakeNormalized = Vector2.zero;
 
+   
+
     //neurla network stuff
     NeuralNetwork network;
     Action<NeuralNetwork, int,float> callbackWhenDone;
@@ -56,10 +58,12 @@ public class SnakeGame : MonoBehaviour {
 
     IEnumerator mainGameLoop()
     {
+        
         while (true)
         {
-            yield return new WaitForSeconds(Snake.timeScale);
-
+            //Debug.Log(Snake.frameDelay);
+            yield return new WaitForSeconds(Snake.frameDelay);
+            //yield return new WaitForSecondsRealtime(Snake.frameDelay);
             networkInputs = generateNetworkInputsBySurroundings();
             outputs = network.feedInputs(networkInputs);
 
@@ -130,7 +134,7 @@ public class SnakeGame : MonoBehaviour {
             //{
             //    snakeDied();
             //}
-            yield return null;
+            //yield return null;
         }
     }
 
@@ -215,7 +219,6 @@ public class SnakeGame : MonoBehaviour {
     void checkForDeath(GridType[,] grid)
     {
         bool dead = false;
-
         if(grid[(int)currentPositionOfSnakeNormalized.x,(int)currentPositionOfSnakeNormalized.y] == GridType.Wall)
         {
             dead = true;
@@ -253,7 +256,6 @@ public class SnakeGame : MonoBehaviour {
                 grid[x, y] = GridType.Nothing;
             }
         }
-
         //init the top row
         for (int x = 0; x < grid.GetLength(0); x++)
         {
@@ -265,7 +267,6 @@ public class SnakeGame : MonoBehaviour {
             grid[x, grid.GetLength(1)-1] = GridType.Wall;
             createWall(new Vector2(x, grid.GetLength(1) - 1));
         }
-
         //init the first col
         //we start at 1 and go to length-1 because we dont want duplicates on the corners of the grid
         for (int y = 1; y < grid.GetLength(1)-1; y++)
@@ -278,13 +279,11 @@ public class SnakeGame : MonoBehaviour {
             grid[grid.GetLength(0)-1, y] = GridType.Wall;
             createWall(new Vector2(grid.GetLength(0) - 1, y));
         }
-
         //set starting snake position
         int xPos = grid.GetLength(0) / 2;
         int yPos = grid.GetLength(1) / 2;
 
         grid[xPos, yPos] = GridType.Head;
-
         snakeHead.transform.position = new Vector2(xPos+xOffset, yPos+yOffset);
     }
 
@@ -388,4 +387,6 @@ public class SnakeGame : MonoBehaviour {
 
         return 0;
     }
+
+ 
 }

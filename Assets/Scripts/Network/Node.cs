@@ -27,7 +27,7 @@ public class Node {
             allDendrites.Add(new Dendrite());
         }
 
-        bias = UnityEngine.Random.Range(-0.01f, 0.01f);
+        bias = UnityEngine.Random.Range(-0.04f, 0.04f);
     }
 
     public Node(List<Dendrite> dendrites,float bias,float lastOutput)

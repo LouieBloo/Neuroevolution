@@ -10,6 +10,9 @@ TagManager:
   - SnakeTail
   - SnakeWall
   - SnakeFood
+  - Target
+  - DeathCircle
+  - Bullet
   layers:
   - Default
   - TransparentFX
@@ -19,12 +22,12 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Ship
+  - Wall
+  - Target
+  - Raycastable
+  - Team0
+  - Team1
   - 
   - 
   - 

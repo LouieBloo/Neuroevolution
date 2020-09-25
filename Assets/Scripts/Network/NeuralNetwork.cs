@@ -5,66 +5,86 @@ using UnityEngine;
 
 public class NeuralNetwork  {
 
-    Layer hiddenLayer;
-    Layer outputLayer;
+    Layer[] layers;
 
-    public float fitness;
+    float fitness;
+    List<float> fitnessHistory = new List<float>();
 
-    
+    public int id = Random.Range(0, 99999);
 
-    public NeuralNetwork(int inputLayerCount, int hiddenLayerCount, int outputLayerCount)
+    public NeuralNetwork(int[] layerCounts)
     {
-        createNetwork(inputLayerCount, hiddenLayerCount, outputLayerCount);
+        this.createNetwork(layerCounts);
     }
 
-    public NeuralNetwork(Layer hiddenLayer,Layer outputLayer)
+    public NeuralNetwork(Layer[] newLayers)
     {
-        this.hiddenLayer = hiddenLayer;
-        this.outputLayer = outputLayer;
+        this.layers = newLayers;
     }
 
-    public void createNetwork(int inputLayerCount,int hiddenLayerCount,int outputLayerCount)
+    private void createNetwork(int[] layerCounts)
     {
-        hiddenLayer = new Layer(hiddenLayerCount,inputLayerCount);
-        outputLayer = new Layer(outputLayerCount,hiddenLayerCount);
+        if(layerCounts.Length < 1) { Debug.Log("No layers found in createNetwork"); }
+
+        //Dont create the input layer so use count-1
+        this.layers = new Layer[layerCounts.Length-1];
+        for(int x = 0; x < this.layers.Length; x++)
+        {
+            this.layers[x] = new Layer(layerCounts[x + 1], layerCounts[x]);
+        }
     }
 
-    
+    public void setFitness(float input)
+    {
+        fitnessHistory.Add(input);
+        this.fitness = input;
+    }
+
+    public float getFitness()
+    {
+        float final = 0;
+        foreach(float f in fitnessHistory)
+        {
+            final += f;
+        }
+        return final;
+    }
+
+    public void resetFitness()
+    {
+        this.fitnessHistory.Clear();
+        this.fitness = 0;
+    }
 
     public List<float> feedInputs(List<float> inputs)
     {
         if(inputs == null) { Debug.Log("Null inputs to NN"); return null; }
-        if (inputs.Count != hiddenLayer.dendriteCount) {
-            Debug.Log("==Mismatched input length==\nFOUND: " + inputs.Count + " NEEDED: " + hiddenLayer.nodeCount);
+        if (inputs.Count != this.layers[0].dendriteCount) {
+            Debug.Log("==Mismatched input length==\nFOUND: " + inputs.Count + " NEEDED: " + this.layers[0].dendriteCount);
             return null;
         }
 
-        outputLayer.calculateOutput(hiddenLayer.calculateOutput(inputs));
+        List<float> previousLayerOutput = inputs;
+        for (int x = 0; x < this.layers.Length; x++)
+        {
+            previousLayerOutput = this.layers[x].calculateOutput(previousLayerOutput);
+        }
 
-        //hiddenLayer.printOutput();
-        //outputLayer.printOutput();
-
-        return outputLayer.lastOutput;
+        return this.layers[this.layers.Length-1].lastOutput;
     }
 
-    void debugInitialization()
+    public void debugInitialization()
     {
         Debug.Log("Hidden:");
-        hiddenLayer.printLayer();
+        //hiddenLayer.printLayer();
 
         Debug.Log("Output:");
-        outputLayer.printLayer();
+        //outputLayer.printLayer();
     }
 
-
-    
-    public Layer getHiddenLayer()
+    public Layer[] getLayers()
     {
-        return hiddenLayer;
+        return this.layers;
     }
 
-    public Layer getOutputLayer()
-    {
-        return outputLayer;
-    }
 }

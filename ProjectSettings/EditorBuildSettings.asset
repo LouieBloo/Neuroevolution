@@ -11,3 +11,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Snake.unity
     guid: b850c3b4ba8a2e440af3da0ae7a07509
+  - enabled: 0
+    path: Assets/Scenes/Lander.unity
+    guid: 68303909ec14aee41bc52b30b3142588
+  - enabled: 0
+    path: Assets/Scenes/Duel.unity
+    guid: de6de799980efbb47bfcfd9f30da52ef
+  - enabled: 0
+    path: Assets/Scenes/Sin.unity
+    guid: 2ba1266a7b5083e4aa633ed4b8828abf

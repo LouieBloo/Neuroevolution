@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
+using System.IO;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -13,9 +14,7 @@ public class NetworkManager : MonoBehaviour
 
     public int initialPopulation = 100;
 
-    public int inputLayerCount;
-    public int hiddenLayerCount;
-    public int outputLayerCount;
+    public int[] layerCounts;
 
     protected int generationCount = 1;
     protected int currentChromosome = 1;
@@ -38,11 +37,22 @@ public class NetworkManager : MonoBehaviour
     public Text currentChromosomeText;
     public Text generationCountText;
     public Text lastAverageFitnessText;
+    public Text timeScaleText;
 
     System.DateTime howLong;
 
+    //write average to file
+    public bool logAverages;
+    StreamWriter writer;
+
     void Start()
     {
+       
+    }
+
+    void OnDestroy()
+    {
+        writer.Close();
     }
 
     public void startPressed()
@@ -50,9 +60,11 @@ public class NetworkManager : MonoBehaviour
         untestedNetworks.Clear();
         testedNetworks.Clear();
 
+        writer = new StreamWriter("averages.txt", true);
+        //11 30 3
         for (int x = 0; x < initialPopulation; x++)
         {
-            untestedNetworks.Add(new NeuralNetwork(inputLayerCount, hiddenLayerCount, outputLayerCount));
+            untestedNetworks.Add(new NeuralNetwork(layerCounts));
         }
 
         startTestingGeneration();
@@ -106,7 +118,7 @@ public class NetworkManager : MonoBehaviour
         //float fitness = timeBasedFitnessCalculation(timeItTookToDie);
         //Debug.Log("Agent died with fitness: " + fitness);
 
-        networkTested.fitness = fitness;
+        networkTested.setFitness(fitness);
 
         untestedNetworks.Remove(networkTested);
         testedNetworks.Add(networkTested);
@@ -132,47 +144,48 @@ public class NetworkManager : MonoBehaviour
     {
         howLong = System.DateTime.Now;
         //sort by fitness, best first
-        testedNetworks = testedNetworks.OrderByDescending(x => x.fitness).ToList();
+        testedNetworks = testedNetworks.OrderByDescending(x => x.getFitness()).ToList();
 
         //calculate average,best,worst fitness of this generation
         lastAverageFitenss = 0;
-        lastBestFitenss = 0;
+        lastBestFitenss = -999999;
         lastWorstFitness = 999999;
         foreach(NeuralNetwork n in testedNetworks)
         {
-            if(n.fitness > lastBestFitenss)//best fitness
+            float networkFitness = n.getFitness();
+            if(networkFitness > lastBestFitenss)//best fitness
             {
-                lastBestFitenss = n.fitness;
+                lastBestFitenss = networkFitness;
             }
-            else if(n.fitness < lastWorstFitness)//worst
+            else if(networkFitness < lastWorstFitness)//worst
             {
-                lastWorstFitness = n.fitness;
+                lastWorstFitness = networkFitness;
             }
 
-            lastAverageFitenss += n.fitness;//average
+            lastAverageFitenss += networkFitness;//average
+           // Debug.Log(n.id + " : " + n.fitness);
         }
 
         lastAverageFitenss /= testedNetworks.Count;
 
-        //Debug.Log("Fitness: " + (System.DateTime.Now - howLong).TotalMilliseconds);
-
         //get how many networks are crossoverRate% of the total population
         int totalEliteChromosomeCount = Mathf.RoundToInt((float)testedNetworks.Count * crossoverRate);
-        //Debug.Log("Tested: " + testedNetworks.Count);
-        //Debug.Log("Top 10 total: " + totalEliteChromosomeCount);
 
-        //create a new list with only our top x% of networks
+        //create a new list with only our top X % of networks
         List<NeuralNetwork> topNetworks = new List<NeuralNetwork>();
         for (int x = 0; x < totalEliteChromosomeCount; x++)
         {
             topNetworks.Add(testedNetworks[x]);
+            //also wipe the networks fitness memory
+            testedNetworks[x].resetFitness();
         }
 
-
+        //choose 2 random networks from our top networks and breed them
         List<NeuralNetwork> newChildren = new List<NeuralNetwork>();
-        int amountOfBreedingNeeded = (testedNetworks.Count - totalEliteChromosomeCount) / 2;//divide by 2 as each breeding generates 2 children
-        //Debug.Log("Breeding: " + amountOfBreedingNeeded);
-        //Debug.Log("Before breeding: " + (System.DateTime.Now - howLong).TotalMilliseconds);
+        //keep the top10Percent from last generation
+        newChildren.AddRange(topNetworks);
+        //divide by 2 as each breeding generates 2 children
+        int amountOfBreedingNeeded = (testedNetworks.Count - totalEliteChromosomeCount) / 2;
         for (int x = 0; x < amountOfBreedingNeeded; x++)
         {
             int firstChoice = Random.Range(0, topNetworks.Count);
@@ -182,19 +195,20 @@ public class NetworkManager : MonoBehaviour
                 secondChoice = Random.Range(0, topNetworks.Count);
             }
 
-
             newChildren.AddRange(breedCrossoverAndMutateNetworks(topNetworks[firstChoice], topNetworks[secondChoice]));
         }
-        //Debug.Log("After breeding: " + (System.DateTime.Now - howLong).TotalMilliseconds);
 
-        //keep the top10Percent from last generation
-        newChildren.AddRange(topNetworks);
+        
 
         resetForNextTest();
 
         untestedNetworks = newChildren;
 
-        //Debug.Log("Untested: " + untestedNetworks.Count);
+        if (logAverages)
+        {
+            writer.Write(lastAverageFitenss + ",");
+            writer.Flush();
+        }
 
         startTestingGeneration();
     }
@@ -216,6 +230,17 @@ public class NetworkManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Used for when we have mutliple rounds of judging before a breed, mutate, etc
+    /// </summary>
+    /// <param name="networks"></param>
+    protected virtual void resetSoft(List<NeuralNetwork> networks)
+    {
+        untestedNetworks = networks;
+
+        testedNetworks = new List<NeuralNetwork>();
+    }
+
+    /// <summary>
     /// Takes in 2 nerual networks and returns 2 children that have been crossedOver
     /// </summary>
     /// <param name="a"></param>
@@ -223,32 +248,38 @@ public class NetworkManager : MonoBehaviour
     /// <returns></returns>
     protected virtual List<NeuralNetwork> breedCrossoverAndMutateNetworks(NeuralNetwork a, NeuralNetwork b)
     {
-        //Layer aHiddenLayer = a.getHiddenLayer().DeepClone();
-        //Layer bHiddenLayer = b.getHiddenLayer().DeepClone();
-        Layer aHiddenLayer = a.getHiddenLayer().copy();//better copy
-        Layer bHiddenLayer = b.getHiddenLayer().copy();
+        
+        Layer[] aLayers = a.getLayers();
+        Layer[] bLayers = b.getLayers();
 
-        //Layer aOutputLayer = a.getOutputLayer().DeepClone();
-        //Layer bOutputLayer = b.getOutputLayer().DeepClone();
-        Layer aOutputLayer = a.getOutputLayer().copy();//better copy
-        Layer bOutputLayer = b.getOutputLayer().copy();
-        //Debug.Log("After cloning: " + (System.DateTime.Now - howLong).TotalMilliseconds);
-        //crossover our layers
-        crossOverLayers(aHiddenLayer, bHiddenLayer);
-        crossOverLayers(aOutputLayer, bOutputLayer);
-        //Debug.Log("After crossover: " + (System.DateTime.Now - howLong).TotalMilliseconds);
-        //mutate layers
-        mutateLayer(aHiddenLayer);
-        mutateLayer(bHiddenLayer);
+        //need to store each crosssed over and mutated layer to make a final network at the end
+        Layer[] aFinalLayers = new Layer[aLayers.Length];
+        Layer[] bFinalLayers = new Layer[bLayers.Length];
 
-        mutateLayer(aOutputLayer);
-        mutateLayer(bOutputLayer);
-        //Debug.Log("After mutate: " + (System.DateTime.Now - howLong).TotalMilliseconds);
-        NeuralNetwork firstChild = new NeuralNetwork(aHiddenLayer, aOutputLayer);
-        NeuralNetwork secondChild = new NeuralNetwork(bHiddenLayer, bOutputLayer);
+        for (int x = 0; x < aLayers.Length; x++)
+        {
+            //copy each layer as we dont want to mess with the original parents since they will be tested in the next trial
+            Layer aNewLayer = aLayers[x].copy();
+            Layer bNewLayer = bLayers[x].copy();
 
+            //crossover our layers
+            crossOverLayers(aNewLayer, bNewLayer);
 
-        return new List<NeuralNetwork>() { firstChild, secondChild };
+            //mutate layers
+            mutateLayer(aNewLayer);
+            mutateLayer(bNewLayer);
+
+            //add these finalized layers to our final array
+            aFinalLayers[x] = aNewLayer;
+            bFinalLayers[x] = bNewLayer;
+        }
+
+        //actually create the offspring
+        NeuralNetwork aChild = new NeuralNetwork(aFinalLayers);
+        NeuralNetwork bChild = new NeuralNetwork(bFinalLayers);
+
+        return new List<NeuralNetwork>() { aChild, bChild };
+
     }
 
     /// <summary>
@@ -329,8 +360,7 @@ public class NetworkManager : MonoBehaviour
     /// <param name="input"></param>
     public void modifyTimeScale(float input)
     {
-        //Time.timeScale = input;
-        timeScale = input / 100f;
-        Debug.Log(timeScale);
+        Time.timeScale = input;
+        this.timeScaleText.text = input + "x real speed";
     }
 }
